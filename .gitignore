@@ -1,0 +1,11 @@
+# Ignore secrets
+.env
+*.env
+
+# Ignore data folders (too heavy for git)
+portainer_data/
+mysql_data/
+postgres_data/
+
+# Ignore system junk
+.DS_Store

@@ -1,0 +1,55 @@
+version: '3.8'
+
+networks:
+  eternal-network:
+    external: true
+
+services:
+  # --- Service 1: The Tunnel (Your Secure Uplink) ---
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      # We will set this in a .env file to keep it clean
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    networks:
+      - eternal-network
+
+  # --- Service 2: Traefik (The Router) ---
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - "--api.insecure=true" # Dashboard on 8080 (internal only)
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    networks:
+      - eternal-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  # --- Service 3: Portainer (The Dashboard) ---
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+    networks:
+      - eternal-network
+    labels:
+      - "traefik.enable=true"
+      # This rule catches 'portainer.eternalservices.ca'
+      - "traefik.http.routers.portainer.rule=Host(`portainer.eternalservices.ca`)"
+      - "traefik.http.routers.portainer.entrypoints=web"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
+volumes:
+  portainer_data:
