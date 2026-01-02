@@ -10,10 +10,10 @@ services:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared
     restart: unless-stopped
-    command: tunnel run
-    environment:
-      # We will set this in a .env file to keep it clean
-      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    command: tunnel --config /etc/cloudflared/config.yaml run
+    volumes:
+      - ./config.yaml:/etc/cloudflared/config.yaml:ro
+      - ./credentials.json:/etc/cloudflared/credentials.json:ro
     networks:
       - eternal-network
 
@@ -23,7 +23,8 @@ services:
     container_name: traefik
     restart: unless-stopped
     command:
-      - "--api.insecure=true" # Dashboard on 8080 (internal only)
+      - "--api.dashboard=true" # Enable dashboard
+      - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
@@ -32,24 +33,30 @@ services:
       - eternal-network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.eternalservices.ca`)"
+      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.routers.traefik.service=api@internal" # Special service for dashboard
+      - "traefik.http.routers.traefik.middlewares=https-headers"
+      - "traefik.http.middlewares.https-headers.headers.customRequestHeaders.X-Forwarded-Proto=https"
 
   # --- Service 3: Portainer (The Dashboard) ---
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
+    command: -H unix:///var/run/docker.sock
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
     networks:
       - eternal-network
     labels:
       - "traefik.enable=true"
-      # This rule catches 'portainer.eternalservices.ca'
       - "traefik.http.routers.portainer.rule=Host(`portainer.eternalservices.ca`)"
       - "traefik.http.routers.portainer.entrypoints=web"
+      - "traefik.http.routers.portainer.middlewares=https-headers"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
 
 volumes:

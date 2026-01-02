@@ -1,0 +1,9 @@
+tunnel: 1dee2b04-cf5d-49ef-8465-fc687ae18798
+credentials-file: /etc/cloudflared/credentials.json
+
+ingress:
+  - hostname: "*.eternalservices.ca"
+    service: http://traefik:80
+  - hostname: "eternalservices.ca"
+    service: http://traefik:80
+  - service: http_status:404
