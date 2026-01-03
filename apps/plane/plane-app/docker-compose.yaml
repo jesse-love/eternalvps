@@ -152,7 +152,7 @@ services:
   # Comment this if you already have a database running
   plane-db:
     image: postgres:15.7-alpine
-    command: postgres -c 'max_connections=1000'
+    command: postgres -c 'max_connections=1000' -c 'shared_buffers=512MB' -c 'effective_cache_size=1536MB'
     deploy:
       replicas: 1
       restart_policy:
@@ -214,9 +214,19 @@ services:
       - eternal-network
     labels:
       - "traefik.enable=true"
+      # HTTP Router (redirect to HTTPS)
+      - "traefik.http.routers.plane-http.rule=Host(`plane.eternalservices.ca`)"
+      - "traefik.http.routers.plane-http.entrypoints=web"
+      - "traefik.http.routers.plane-http.middlewares=redirect-to-https"
+      # HTTPS Router
       - "traefik.http.routers.plane.rule=Host(`plane.eternalservices.ca`)"
-      - "traefik.http.routers.plane.entrypoints=web"
-      - "traefik.http.routers.plane.middlewares=https-headers"
+      - "traefik.http.routers.plane.entrypoints=websecure"
+      - "traefik.http.routers.plane.tls=true"
+      - "traefik.http.routers.plane.tls.certresolver=letsencrypt"
+      # Middleware
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
+      # Service
       - "traefik.http.services.plane.loadbalancer.server.port=80"
     depends_on:
       - plane-web
