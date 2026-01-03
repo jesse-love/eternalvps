@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETERNAL SERVICES | Mission Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00e5ff;
+            --secondary: #7b2cbf;
+            --bg: #0a0a0f;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --text: #ffffff;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 10%, #1a1a2e 0%, #0a0a0f 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 2rem;
+            text-align: center;
+            z-index: 2;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -2px;
+        }
+
+        p.subtitle {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 4rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0, 229, 255, 0.1);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        .glow {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(0,229,255,0.1) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            border-radius: 50%;
+            transition: all 0.5s ease;
+        }
+
+        .card:hover .glow {
+            transform: scale(1.5);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ETERNAL SERVICES</h1>
+        <p class="subtitle">Digital Sovereignty Established</p>
+
+        <div class="grid">
+            <a href="https://chat.eternalservices.ca" class="card">
+                <div class="glow"></div>
+                <h2><span class="status-dot"></span> COMMAND CENTER</h2>
+                <p>Secure communications and ops coordination via Mattermost.</p>
+            </a>
+
+            <a href="https://plane.eternalservices.ca" class="card">
+                <div class="glow"></div>
+                <h2><span class="status-dot"></span> MISSION CONTROL</h2>
+                <p>Project management, strategy, and roadmap via Plane.</p>
+            </a>
+
+            <a href="https://meet.eternalservices.ca" class="card">
+                <div class="glow"></div>
+                <h2><span class="status-dot"></span> SECURE COMMS</h2>
+                <p>High-fidelity video conferencing via Jitsi Meet.</p>
+            </a>
+
+            <a href="https://portainer.eternalservices.ca" class="card">
+                <div class="glow"></div>
+                <h2><span class="status-dot"></span> ENGINE ROOM</h2>
+                <p>Container orchestration and fleet management via Portainer.</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,11 +1,44 @@
-# Ignore secrets
+# EternalVPS - Git Ignore
+
+# --- SECRETS & CREDENTIALS ---
+# Absolutely protect these files.
 .env
 *.env
+**/*.env
+core/credentials.json
+*.pem
+*.key
+*.crt
 
-# Ignore data folders (too heavy for git)
+# --- CONFIG & STATE ---
+# Ignore locally generated config files that contain secrets or instance-specific data.
+apps/mattermost/config/config.json
+apps/jitsi/.env
+apps/plane/plane-app/plane.env
+apps/plane/plane-app/.env
+
+# --- DATA FOLDERS ---
+# Do not commit database storage or heavy volumes.
 portainer_data/
 mysql_data/
 postgres_data/
+redis_data/
+minio_data/
+uploads/
+*.log
+logs/
 
-# Ignore system junk
+# --- DOCKER ---
+# We WANT to commit docker-compose.yml files (they are the infrastructure code).
+# But we must ensure they don't contain hardcoded secrets.
+# I will NOT ignore docker-compose.yml by default, but I will sanitize them.
+
+# --- SYSTEM JUNK ---
 .DS_Store
+node_modules/
+.idea/
+.vscode/
+apps/mattermost/data/
+apps/mattermost/logs/
+apps/mattermost/plugins/
+apps/mattermost/client/plugins/

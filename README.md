@@ -1,6 +1,10 @@
-# 🌌 EternalVPS: Core Infrastructure
+# 🌌 Eternal Services: The Mission Brief
 
-This repository contains the configuration and documentation for the **EternalVPS** core infrastructure. It is designed for high-performance, AI-assisted development with automated cloud routing and a "pimped-out" terminal environment.
+**Mission**: Engineering incorruptible, stateless, and AI-led infrastructure.
+**Hero Architect**: Jesse Love
+**Tactical Operatives**: Chris & AI-Managed Agents
+
+This repository is the source of truth for the **Eternal Services** Digital Citadel. It is a completely self-hosted, cloud-proxied, and AI-integrated ecosystem.
 
 ## 🚀 Quick Start
 

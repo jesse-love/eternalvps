@@ -1,0 +1,64 @@
+version: "3.9"
+
+networks:
+  eternal-network:
+    external: true
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: mattermost-db
+    restart: unless-stopped
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=mmuser
+      - POSTGRES_PASSWORD=mmuser_password
+      - POSTGRES_DB=mattermost
+    networks:
+      - eternal-network
+
+  mattermost:
+    image: mattermost/mattermost-team-edition:latest
+    container_name: mattermost
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      # --- System Configuration ---
+      - MM_SQLSETTINGS_DRIVERNAME=postgres
+      - MM_SQLSETTINGS_DATASOURCE=postgres://mmuser:mmuser_password@postgres:5432/mattermost?sslmode=disable&connect_timeout=10
+
+      # --- Service Settings ---
+      - MM_SERVICESETTINGS_SITEURL=https://chat.eternalservices.ca
+      - MM_SERVICESETTINGS_LISTENADDRESS=:8065
+      - MM_PLUGINSETTINGS_ENABLE=true
+      - MM_PLUGINSETTINGS_ENABLEUPLOADS=true
+      - MM_PLUGINSETTINGS_PLUGINS_jitsi_jitsiurl=https://meet.eternalservices.ca
+      - MM_PLUGINSETTINGS_PLUGINS_jitsi_jitsinamingmode=MattermostChannelName
+
+      # --- File Storage (Eternalized to R2) ---
+      - MM_FILESETTINGS_DRIVERNAME=amazons3
+      - MM_FILESETTINGS_AMAZONS3ACCESSKEYID=23add1cbbc68e9a5a1698b159a43d842
+      - MM_FILESETTINGS_AMAZONS3SECRETACCESSKEY=91b94a67d3b8b565fd42e917fe63fbe6d2042559e3532b82720b639f3d849a33
+      - MM_FILESETTINGS_AMAZONS3BUCKET=eternal-mattermost-assets
+      - MM_FILESETTINGS_AMAZONS3ENDPOINT=5772e49844ea425074390a12e24b06e1.r2.cloudflarestorage.com
+      - MM_FILESETTINGS_AMAZONS3REGION=auto
+      - MM_FILESETTINGS_AMAZONS3SSL=true
+      - MM_FILESETTINGS_AMAZONS3SIGNV2=false
+
+    volumes:
+      - ./config:/mattermost/config:rw
+      - ./data:/mattermost/data:rw
+      - ./logs:/mattermost/logs:rw
+      - ./plugins:/mattermost/plugins:rw
+      - ./client/plugins:/mattermost/client/plugins:rw
+      - ./bleve-indexes:/mattermost/bleve-indexes:rw
+    networks:
+      - eternal-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mattermost.rule=Host(`chat.eternalservices.ca`)"
+      - "traefik.http.routers.mattermost.entrypoints=web"
+      - "traefik.http.routers.mattermost.middlewares=https-headers"
+      - "traefik.http.services.mattermost.loadbalancer.server.port=8065"

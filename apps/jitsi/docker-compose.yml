@@ -1,0 +1,115 @@
+version: '3'
+
+services:
+  # Frontend
+  web:
+    image: jitsi/web:stable
+    restart: always
+    volumes:
+      - ${CONFIG}/web:/config:Z
+      - ${CONFIG}/web/letsencrypt:/etc/letsencrypt:Z
+      - ${CONFIG}/transcripts:/usr/share/jitsi-meet/transcripts:Z
+    environment:
+      - ENABLE_AUTH
+      - ENABLE_GUESTS
+      - ENABLE_LETSENCRYPT
+      - ENABLE_HTTP_REDIRECT
+      - ENABLE_TRANSCRIPTIONS
+      - JICOFO_AUTH_USER
+      - JICOFO_AUTH_PASSWORD
+      - JVB_AUTH_USER
+      - JVB_AUTH_PASSWORD
+      - JIGASI_XMPP_USER
+      - JIGASI_XMPP_PASSWORD
+      - JIBRI_RECORDER_USER
+      - JIBRI_RECORDER_PASSWORD
+      - JIBRI_XMPP_USER
+      - JIBRI_XMPP_PASSWORD
+      - TZ
+      - PUBLIC_URL
+      - IP_ADDRESS
+      - DOCKER_HOST_ADDRESS
+      - JITSI_IMAGE_VERSION
+    networks:
+      - eternal-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jitsi.rule=Host(`meet.eternalservices.ca`)"
+      - "traefik.http.routers.jitsi.entrypoints=web"
+      - "traefik.http.routers.jitsi.middlewares=https-headers"
+      - "traefik.http.services.jitsi.loadbalancer.server.port=80"
+
+  # XMPP Server
+  prosody:
+    image: jitsi/prosody:stable
+    restart: always
+    volumes:
+      - ${CONFIG}/prosody/config:/config:Z
+      - ${CONFIG}/prosody/prosody-plugins-custom:/prosody-plugins-custom:Z
+    environment:
+      - TZ
+      - PUBLIC_URL
+      - IP_ADDRESS
+      - DOCKER_HOST_ADDRESS
+      - ENABLE_AUTH
+      - ENABLE_GUESTS
+      - GLOBAL_MODULES
+      - GLOBAL_CONFIG
+      - JICOFO_AUTH_USER
+      - JICOFO_AUTH_PASSWORD
+      - JVB_AUTH_USER
+      - JVB_AUTH_PASSWORD
+      - JIGASI_XMPP_USER
+      - JIGASI_XMPP_PASSWORD
+      - JIBRI_RECORDER_USER
+      - JIBRI_RECORDER_PASSWORD
+      - JIBRI_XMPP_USER
+      - JIBRI_XMPP_PASSWORD
+    networks:
+      - eternal-network
+
+  # Focus Component
+  jicofo:
+    image: jitsi/jicofo:stable
+    restart: always
+    volumes:
+      - ${CONFIG}/jicofo:/config:Z
+    environment:
+      - TZ
+      - JICOFO_AUTH_USER
+      - JICOFO_AUTH_PASSWORD
+      - JICOFO_ENABLE_BRIDGE_HEALTH_CHECKS
+      - PROSODY_ENABLE_AV_MODERATION
+      - JIBRI_API_URL
+      - JIBRI_PENDING_TIMEOUT
+    networks:
+      - eternal-network
+
+  # Video Bridge
+  jvb:
+    image: jitsi/jvb:stable
+    restart: always
+    volumes:
+      - ${CONFIG}/jvb:/config:Z
+    environment:
+      - TZ
+      - PUBLIC_URL
+      - DOCKER_HOST_ADDRESS
+      - JVB_AUTH_USER
+      - JVB_AUTH_PASSWORD
+      - JVB_BREWERY_MUC
+      - JVB_PORT
+      - JVB_TCP_HARVESTER_DISABLED
+      - JVB_TCP_PORT
+      - JVB_TCP_MAPPED_PORT
+      - JVB_STUN_SERVERS
+      - JVB_ENABLE_APIS
+      - JICOFO_AUTH_USER
+      - JICOFO_AUTH_PASSWORD
+      - PROSODY_ENABLE_AV_MODERATION
+    networks:
+      - eternal-network
+
+networks:
+  eternal-network:
+    external: true
