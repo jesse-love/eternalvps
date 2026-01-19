@@ -42,3 +42,4 @@ apps/mattermost/data/
 apps/mattermost/logs/
 apps/mattermost/plugins/
 apps/mattermost/client/plugins/
+.aider*

@@ -1,4 +1,4 @@
-# 🌌 Eternal Services: The Mission Brief
+  # 🌌 Eternal Services: The Mission Brief
 
 **Mission**: Engineering incorruptible, stateless, and AI-led infrastructure.
 **Hero Architect**: Jesse Love

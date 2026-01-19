@@ -1,0 +1,102 @@
+networks:
+  eternal-network:
+    name: eternal-network # Explicitly name the network
+    driver: bridge
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel --config /etc/cloudflared/config.yaml run
+    volumes:
+      - ./core/config.yaml:/etc/cloudflared/config.yaml:ro
+      - ./core/credentials.json:/etc/cloudflared/credentials.json:ro
+    networks:
+      - eternal-network
+
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+    networks:
+      - eternal-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.eternalservices.ca`)"
+      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.routers.traefik.service=api@internal"
+      # This middleware is defined in the Portainer service, but we declare it here for clarity
+      - "traefik.http.middlewares.https-headers.headers.customRequestHeaders.X-Forwarded-Proto=https"
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    networks:
+      - eternal-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.eternalservices.ca`)"
+      - "traefik.http.routers.portainer.middlewares=https-headers@docker"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n
+    restart: unless-stopped
+    environment:
+      - N8N_HOST=n8n.eternalservices.ca
+      - N8N_PORT=5678
+      - WEBHOOK_URL=https://n8n.eternalservices.ca/
+      - GENERIC_TIMEZONE=America/New_York
+      - TZ=America/New_York
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=n8nuser
+      - N8N_BASIC_AUTH_PASSWORD=12b10c1ee9dd8d3f24a571d110df8fe5
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=n8n-db
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+      - DB_POSTGRESDB_USER=n8n
+      - DB_POSTGRESDB_PASSWORD=790f51e64cf94a0f4b74f0ac68860488
+    volumes:
+      - ./apps/n8n/n8n_data:/home/node/.n8n
+    networks:
+      - eternal-network
+    depends_on:
+      - n8n-db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n.rule=Host(`n8n.eternalservices.ca`)"
+      - "traefik.http.routers.n8n.entrypoints=web"
+      - "traefik.http.routers.n8n.middlewares=https-headers@docker"
+      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+
+  n8n-db:
+    image: postgres:13
+    container_name: n8n-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=n8n
+      - POSTGRES_USER=n8n
+      - POSTGRES_PASSWORD=790f51e64cf94a0f4b74f0ac68860488
+    volumes:
+      - ./apps/n8n/postgres_data:/var/lib/postgresql/data
+    networks:
+      - eternal-network
+
+volumes:
+  portainer_data:
