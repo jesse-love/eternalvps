@@ -6,6 +6,11 @@
 
 This repository is the source of truth for the **Eternal Services** Digital Citadel. It is a completely self-hosted, cloud-proxied, and AI-integrated ecosystem.
 
+## 📚 Documentation
+*   [**Roadmap**](docs/ROADMAP.md): The strategic plan for the "Autonomous Cloud Agency".
+*   [**Architecture**](docs/ARCHITECTURE.md): System design and data flow.
+*   [**Dev Logs**](docs/LOGS.md): Daily progress and changes.
+
 ## 🚀 Quick Start
 
 ### Activation

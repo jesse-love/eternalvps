@@ -10,8 +10,8 @@ services:
     restart: unless-stopped
     command: tunnel --config /etc/cloudflared/config.yaml run
     volumes:
-      - ./core/config.yaml:/etc/cloudflared/config.yaml:ro
-      - ./core/credentials.json:/etc/cloudflared/credentials.json:ro
+      - ./config.yaml:/etc/cloudflared/config.yaml:ro
+      - ./credentials.json:/etc/cloudflared/credentials.json:ro
     networks:
       - eternal-network
 
@@ -73,7 +73,7 @@ services:
       - DB_POSTGRESDB_USER=n8n
       - DB_POSTGRESDB_PASSWORD=790f51e64cf94a0f4b74f0ac68860488
     volumes:
-      - ./apps/n8n/n8n_data:/home/node/.n8n
+      - ../apps/n8n/n8n_data:/home/node/.n8n
     networks:
       - eternal-network
     depends_on:
@@ -94,13 +94,13 @@ services:
       - POSTGRES_USER=n8n
       - POSTGRES_PASSWORD=790f51e64cf94a0f4b74f0ac68860488
     volumes:
-      - ./apps/n8n/postgres_data:/var/lib/postgresql/data
+      - ../apps/n8n/postgres_data:/var/lib/postgresql/data
     networks:
       - eternal-network
 
   # --- HUB (Landing Page) ---
   hub:
-    build: ./apps/hub
+    build: ../apps/hub
     container_name: hub
     restart: unless-stopped
     networks:
@@ -124,11 +124,11 @@ services:
     tmpfs:
       - /tmp
     volumes:
-      - ./apps/mattermost/config:/mattermost/config:rw
-      - ./apps/mattermost/data:/mattermost/data:rw
-      - ./apps/mattermost/logs:/mattermost/logs:rw
-      - ./apps/mattermost/plugins:/mattermost/plugins:rw
-      - ./apps/mattermost/client/plugins:/mattermost/client/plugins:rw
+      - ../apps/mattermost/config:/mattermost/config:rw
+      - ../apps/mattermost/data:/mattermost/data:rw
+      - ../apps/mattermost/logs:/mattermost/logs:rw
+      - ../apps/mattermost/plugins:/mattermost/plugins:rw
+      - ../apps/mattermost/client/plugins:/mattermost/client/plugins:rw
       - /etc/localtime:/etc/localtime:ro
     environment:
       - MM_SQLSETTINGS_DRIVERNAME=postgres
@@ -147,11 +147,11 @@ services:
       - "traefik.http.services.mattermost.loadbalancer.server.port=8065"
 
   mattermost-db:
-    image: postgres:13-alpine
+    image: postgres:15-alpine
     container_name: mattermost-db
     restart: unless-stopped
     volumes:
-      - ./apps/mattermost/db_data:/var/lib/postgresql/data
+      - ../apps/mattermost/db_data:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
     environment:
       - POSTGRES_USER=mmuser
